@@ -110,4 +110,42 @@ sequenceDiagram
 
 ---
 
-This version is more structured and should be easier for others to understand. Let me know if you’d like further refinements!
+# Directory Structure
+```
+/meme-service
+├── /cmd
+│   └── /api
+│       └── main.go          # Entry point for the API service
+├── /internal
+│   ├── /api
+│   │   └── /v1              # Versioned API folder
+│   │       └── routes.go    # API routes for v1
+│   ├── /memes               # Meme resource
+│   │   ├── handler.go       # HTTP handler for memes
+│   │   ├── service.go       # Business logic for memes
+│   │   ├── model.go         # Data models for memes
+│   │   └── repository.go    # Database operations for memes
+│   ├── /users               # User resource
+│   │   ├── handler.go       # HTTP handler for users
+│   │   ├── service.go       # Business logic for users
+│   │   ├── model.go         # Data models for users
+│   │   └── repository.go    # Database operations for users
+│   ├── /config
+│   │   └── config.go        # Configuration loading (e.g., env vars)
+│   ├── /pubsub              # Pub/Sub logic
+│   │   └── sqs.go           # AWS SQS client and logic
+│   └── /utils               # Utility functions
+│       └── jwt.go           # JWT token utilities
+├── /pkg
+│   └── /http                # Shared HTTP utilities
+│       └── response.go      # Standardized HTTP responses
+├── /migrations              # Database migrations (if needed)
+│   └── migration_script.go
+├── /scripts                 # Helper scripts (e.g., for deployment)
+│   └── deploy.sh
+├── /api                     # API definitions (e.g., OpenAPI/Swagger)
+│   └── swagger.yaml
+├── go.mod                   # Go module file
+├── go.sum                   # Go dependencies checksum file
+└── README.md                # Project documentation
+```
