@@ -125,8 +125,6 @@ sequenceDiagram
 │   │   ├── service.go       # Business logic for memes
 │   │   ├── model.go         # Data models for memes
 │   │   └── repository.go    # Database operations for memes
-│   ├── /config
-│   │   └── config.go        # Configuration loading (e.g., env vars)
 │   ├── /pubsub              # Pub/Sub logic
 │   │   └── sqs.go           # AWS SQS client and logic
 │   └── /utils               # Utility functions
@@ -137,6 +135,8 @@ sequenceDiagram
 │   │   ├── service.go       # Business logic for users
 │   │   ├── model.go         # Data models for users
 │   │   └── repository.go    # Database operations for users
+├── /config                  # Would normally have one for each micro but since we have the external micros in this as well, putting it at this level to make it less confusing
+│   │   └── config.go        # Configuration loading (e.g., env vars)
 ├── /pkg                     # Shared packages across microservices
 │   └── /http                # Shared HTTP utilities
 │       └── response.go      # Standardized HTTP responses
