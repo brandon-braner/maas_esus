@@ -125,20 +125,25 @@ sequenceDiagram
 │   │   ├── service.go       # Business logic for memes
 │   │   ├── model.go         # Data models for memes
 │   │   └── repository.go    # Database operations for memes
-│   ├── /users               # User resource
-│   │   ├── handler.go       # HTTP handler for users
-│   │   ├── service.go       # Business logic for users
-│   │   ├── model.go         # Data models for users
-│   │   └── repository.go    # Database operations for users
 │   ├── /config
 │   │   └── config.go        # Configuration loading (e.g., env vars)
 │   ├── /pubsub              # Pub/Sub logic
 │   │   └── sqs.go           # AWS SQS client and logic
 │   └── /utils               # Utility functions
 │       └── jwt.go           # JWT token utilities
-├── /pkg
+├── /external                # simulate external apis
+│   ├── /usersapi            # External User API
+│   │   ├── handler.go       # HTTP handler for users(probably not need this, no real http routes)
+│   │   ├── service.go       # Business logic for users
+│   │   ├── model.go         # Data models for users
+│   │   └── repository.go    # Database operations for users
+├── /pkg                     # Shared packages across microservices
 │   └── /http                # Shared HTTP utilities
 │       └── response.go      # Standardized HTTP responses
+│   └── /jwt                 # Shared JWT utilities
+│       └── jwt.go           # JWT utilites
+│   └── /permissions         # Shared Permissions Library
+│       └── model.go         # Data Models for Permissions
 ├── /migrations              # Database migrations (if needed)
 │   └── migration_script.go
 ├── /scripts                 # Helper scripts (e.g., for deployment)
