@@ -8,7 +8,10 @@ import (
 	"github.com/brandonbraner/maas/pkg/contextservice"
 	"github.com/brandonbraner/maas/pkg/errors"
 	"github.com/brandonbraner/maas/pkg/http/responses"
+	"github.com/brandonbraner/maas/pkg/logger"
 )
+
+var log = logger.NewJsonLogger()
 
 var memeService *MemeService
 
@@ -16,8 +19,10 @@ func init() {
 	var err error
 	memeService, err = NewMemeService()
 	if err != nil {
+		log.Error("Failed to initialize meme service", "error", err)
 		panic(fmt.Sprintf("failed to initialize meme service: %v", err))
 	}
+	log.Info("Meme service initialized successfully")
 }
 
 func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +36,7 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		errmsg := errors.CustomError{
 			ErrorMessage: err.Error(),
 		}
+		log.Error(err.Error())
 		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
 		return
 	}
@@ -39,9 +45,11 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 	ctxUser, ok := userctx.(contextservice.CTXUser)
 
 	if !ok {
+		msg := "Internal Server Error loading MemeCtx"
 		errmsg := errors.CustomError{
-			ErrorMessage: "Internal Server Error loading MemeCtx",
+			ErrorMessage: msg,
 		}
+		log.Error(msg)
 		responses.JsonResponse(w, http.StatusInternalServerError, errmsg)
 		return
 	}
@@ -50,9 +58,11 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 
 	ok = memeService.VerifyTokens(aipermission, ctxUser.Tokens)
 	if !ok {
+		msg := fmt.Sprintf("Not enough tokens to complete request. Current token count of %d.", ctxUser.Tokens)
 		errmsg := errors.CustomError{
-			ErrorMessage: fmt.Sprintf("Not enough tokens to complete request. Current token count of %d.", ctxUser.Tokens),
+			ErrorMessage: msg,
 		}
+		log.Error(msg)
 		responses.JsonResponse(w, http.StatusPaymentRequired, errmsg)
 		return
 	}
@@ -62,6 +72,7 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		errmsg := errors.CustomError{
 			ErrorMessage: err.Error(),
 		}
+		log.Error(err.Error())
 		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
 		return
 	}
@@ -76,9 +87,11 @@ func MemeTokenHandler(w http.ResponseWriter, r *http.Request) {
 	ctxUser, ok := userctx.(contextservice.CTXUser)
 
 	if !ok {
+		msg := "Internal Server Error loading MemeCtx"
 		errmsg := errors.CustomError{
-			ErrorMessage: "Internal Server Error loading MemeCtx",
+			ErrorMessage: msg,
 		}
+		log.Error(msg)
 		responses.JsonResponse(w, http.StatusInternalServerError, errmsg)
 		return
 	}
@@ -86,9 +99,11 @@ func MemeTokenHandler(w http.ResponseWriter, r *http.Request) {
 	tokencount, err := memeService.GetTokenCount(ctxUser.Username)
 
 	if err != nil {
+		msg := err.Error()
 		errmsg := errors.CustomError{
-			ErrorMessage: err.Error(),
+			ErrorMessage: msg,
 		}
+		log.Error(err.Error())
 		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
 		return
 	}
