@@ -6,14 +6,11 @@ import (
 	"strings"
 
 	"github.com/brandonbraner/maas/external/usersapi"
+	"github.com/brandonbraner/maas/pkg/contextservice"
 	"github.com/brandonbraner/maas/pkg/errors"
 	"github.com/brandonbraner/maas/pkg/http/responses"
 	"github.com/brandonbraner/maas/pkg/jwtservice"
 )
-
-type contextKey string
-
-const CtxUser contextKey = "ctxuser"
 
 type AuthMiddleware struct{}
 
@@ -40,11 +37,6 @@ func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next 
 		return
 	}
 
-	// mongoClient, err := database.GetClient()
-	// if err != nil {
-	// w.WriteHeader(http.StatusInternalServerError)
-	// return
-	// }
 	userService, err := usersapi.NewUserService()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,20 +52,14 @@ func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next 
 		return
 	}
 
-	// ctxPermissions, err := contextservice.ConvertViaJSON(u.Permissions)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
+	ctxUser := contextservice.CTXUser{
+		Username:    user.Username,
+		Firstname:   user.Firstname,
+		Lastname:    user.Lastname,
+		Permissions: user.Permissions,
+	}
 
-	// ctxUser := contextservice.User{
-	// 	Username:    u.Username,
-	// 	Firstname:   u.Firstname,
-	// 	Lastname:    u.Lastname,
-	// 	Permissions: ctxPermissions,
-	// }
-
-	r = r.WithContext(context.WithValue(r.Context(), CtxUser, user))
+	r = r.WithContext(context.WithValue(r.Context(), contextservice.CtxUser, ctxUser))
 
 	next(w, r)
 }
