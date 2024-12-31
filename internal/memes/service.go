@@ -67,3 +67,22 @@ func (s *MemeService) ChargeTokens(aiGenerated bool, username string) error {
 	tokenservice.UpdateTokens(username, numOfTokens)
 	return nil
 }
+
+func (s *MemeService) VerifyTokens(aiGenerated bool, currenttokens int) bool {
+	if currenttokens < 0 {
+		return false
+	}
+
+	var tokensRequired int
+	if aiGenerated {
+		tokensRequired = config.AppConfig.AI_TEXT_MEME_TOKEN_COST
+	} else {
+		tokensRequired = config.AppConfig.TEXT_MEME_TOKEN_COST
+	}
+
+	if currenttokens < tokensRequired {
+		return false
+	}
+	return true
+
+}

@@ -51,7 +51,14 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 
 	aipermission := ctxUser.Permissions.GenerateLlmMeme
 
-	//TODO we should make sure they have enough tokens to gen the meme
+	ok = memeService.VerifyTokens(aipermission, ctxUser.Tokens)
+	if !ok {
+		errmsg := errors.CustomError{
+			ErrorMessage: fmt.Sprintf("Not enough tokens to complete request. Current token count of %d.", ctxUser.Tokens),
+		}
+		responses.JsonResponse(w, http.StatusInternalServerError, errmsg)
+		return
+	}
 
 	memeresponse, err := memeService.GenerateMeme(aipermission, memeRequest)
 	if err != nil {
