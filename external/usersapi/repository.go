@@ -23,7 +23,7 @@ type userRepository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(ctx context.Context) (UserRepository, error) {
+func NewUserRepository(ctx context.Context) (*userRepository, error) {
 	client, err := database.GetClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database client: %w", err)
@@ -37,12 +37,13 @@ func NewUserRepository(ctx context.Context) (UserRepository, error) {
 	}, nil
 }
 
-func (r *userRepository) Create(ctx context.Context, user *User) error {
-	_, err := r.collection.InsertOne(ctx, user)
+func (r *userRepository) Create(ctx context.Context, user *User) (*mongo.InsertOneResult, error) {
+	result, err := r.collection.InsertOne(ctx, user)
 	if err != nil {
-		return fmt.Errorf("failed to create user: %w", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-	return nil
+
+	return result, nil
 }
 
 func (r *userRepository) GetByID(ctx context.Context, id string) (*User, error) {
@@ -62,6 +63,7 @@ func (r *userRepository) GetByUserName(ctx context.Context, username string) (*U
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user by id: %w", err)
 	}
+
 	return &user, nil
 }
 
