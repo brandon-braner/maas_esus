@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/brandonbraner/maas/config"
-	"github.com/brandonbraner/maas/pkg/jwt"
+	"github.com/brandonbraner/maas/pkg/jwtservice"
 	"github.com/brandonbraner/maas/pkg/permissions"
 	"github.com/stretchr/testify/assert"
 )
@@ -45,7 +45,7 @@ func TestUserService_GenerateJwt(t *testing.T) {
 		assert.NotEmpty(t, token)
 		useridString := user.ID.Hex()
 		// Verify token claims
-		claims, err := jwt.ValidateToken(token)
+		claims, err := jwtservice.ValidateToken(token)
 		assert.NoError(t, err)
 		assert.Equal(t, useridString, claims.UserID)
 		assert.Equal(t, user.Username, claims.Email)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/brandonbraner/maas/config"
+	"github.com/brandonbraner/maas/internal/ai"
 	"github.com/brandonbraner/maas/internal/geolocation/google"
 )
 
@@ -23,8 +24,10 @@ func NewMemeGenerator(aiPermission bool) (*MemeGenerator, error) {
 
 	switch {
 	case aiPermission:
+		aiService := ai.NewOpenAIMemeService()
 		generator = &AITextMemeGenerator{
 			GeoService: geoservice,
+			AIService:  aiService,
 		}
 	case !aiPermission:
 		generator = &TextMemeGenerator{
@@ -57,6 +60,7 @@ func (g *TextMemeGenerator) Generate(req MemeRequest) (MemeResponse, error) {
 
 type AITextMemeGenerator struct {
 	GeoService *google.GeoLocationService
+	AIService  *ai.OpenAIMemeService
 }
 
 func (g *AITextMemeGenerator) Generate(req MemeRequest) (MemeResponse, error) {
@@ -66,8 +70,41 @@ func (g *AITextMemeGenerator) Generate(req MemeRequest) (MemeResponse, error) {
 		return MemeResponse{}, err
 	}
 
+	systemPrompt := `
+	You are a "Meme-as-a-Service" generator. Your task is to create original and humorous memes based on user requests.
+	
+	**Capabilities:**
+	*   **Text Generation:** You can generate witty, humorous, and relevant text captions for memes.
+	*   **Concept Combination:** You can creatively combine user-provided concepts or topics to generate unexpected and funny meme ideas.
+	*   **Adaptability:** You can adapt your meme generation style based on user instructions (e.g., "sarcastic," "absurdist," "wholesome").
+	*   **Location** If give a location you must include that location in the generation of the meme
+	
+	**Response Format:**
+	Return the generated meme in the following JSON format:
+	{
+	  "text": "Your generated meme text here",
+	  "location": "Location of the meme (if provided)"
+	}
+	`
+
+	var locationPrompt string
+
+	if err == nil {
+		locationPrompt = fmt.Sprintf("The full address of the location is: %s. "+
+			"Please take the city and state or equivelent from it and generate the meme for that location.", locationinfo.Address)
+	}
+
+	userPrompt := locationPrompt + "\n" + req.Query
+
+	prompts := ai.MemePrompt{
+		SystemPrompt: systemPrompt,
+		UserPrompt:   userPrompt,
+	}
+
+	meme, _ := g.AIService.GenerateTextMeme(&prompts)
+
 	return MemeResponse{
-		Text:     fmt.Sprintf("This is a AI meme about %s based at the location %s", req.Query, locationinfo.Address),
+		Text:     meme,
 		Location: fmt.Sprintf("Location %s derived from lat/lng %f/%f", locationinfo.Address, req.Lat, req.Lng),
 	}, nil
 }
