@@ -39,6 +39,14 @@ func NewUserRepository(ctx context.Context) (*userRepository, error) {
 	}, nil
 }
 
+func (r *userRepository) convertIdToPrimative(id string) primitive.ObjectID {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal("Failed to convert hex string to ObjectID:", err)
+	}
+	return objectID
+}
+
 func (r *userRepository) Create(ctx context.Context, user *User) (*mongo.InsertOneResult, error) {
 	result, err := r.collection.InsertOne(ctx, user)
 	if err != nil {
@@ -49,8 +57,10 @@ func (r *userRepository) Create(ctx context.Context, user *User) (*mongo.InsertO
 }
 
 func (r *userRepository) GetByID(ctx context.Context, id string) (*User, error) {
+	objectID := r.convertIdToPrimative(id)
+
 	var user User
-	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	err := r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user by id: %w", err)
 	}
@@ -70,8 +80,10 @@ func (r *userRepository) GetByUserName(ctx context.Context, username string) (*U
 }
 
 func (r *userRepository) Update(ctx context.Context, id string, user *User) error {
+	objectID := r.convertIdToPrimative(id)
+
 	_, err := r.collection.UpdateOne(ctx,
-		bson.M{"_id": id},
+		bson.M{"_id": objectID},
 		bson.M{"$set": user},
 	)
 	if err != nil {
@@ -81,11 +93,8 @@ func (r *userRepository) Update(ctx context.Context, id string, user *User) erro
 }
 
 func (r *userRepository) Delete(ctx context.Context, id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		log.Fatal("Failed to convert hex string to ObjectID:", err)
-	}
-	_, err = r.collection.DeleteOne(ctx, bson.M{"_id": objectID})
+	objectID := r.convertIdToPrimative(id)
+	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": objectID})
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
