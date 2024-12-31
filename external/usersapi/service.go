@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/brandonbraner/maas/pkg/jwtservice"
 	"github.com/brandonbraner/maas/pkg/permissions"
@@ -14,6 +15,7 @@ import (
 
 type UserService struct {
 	Repo *userRepository
+	mu   sync.Mutex
 }
 
 func NewUserService() (*UserService, error) {
@@ -94,10 +96,13 @@ func (us *UserService) DeleteAllUsers() (int64, error) {
 	return count, err
 }
 
-func (us *UserService) AddTokens(username string, amount int) error {
+func (us *UserService) UpdateTokens(username string, amount int) error {
 	if username == "" {
 		return errors.New("username cannot be empty")
 	}
+
+	us.mu.Lock()
+	defer us.mu.Unlock()
 
 	user, err := us.Repo.GetByUserName(context.TODO(), username)
 	if err != nil {

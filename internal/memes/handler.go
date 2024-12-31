@@ -21,6 +21,8 @@ func init() {
 }
 
 func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
+	// var err error
+
 	var memeRequest MemeRequest
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&memeRequest)
@@ -45,6 +47,16 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	aipermission := ctxUser.Permissions.GenerateLlmMeme
+
+	ok = memeService.VerifyTokens(aipermission, ctxUser.Tokens)
+	if !ok {
+		errmsg := errors.CustomError{
+			ErrorMessage: fmt.Sprintf("Not enough tokens to complete request. Current token count of %d.", ctxUser.Tokens),
+		}
+		responses.JsonResponse(w, http.StatusPaymentRequired, errmsg)
+		return
+	}
+
 	memeresponse, err := memeService.GenerateMeme(aipermission, memeRequest)
 	if err != nil {
 		errmsg := errors.CustomError{
@@ -53,5 +65,8 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
 		return
 	}
+
+	//Assume we have made it here, we got a meme, lets charge them some tokens
+	memeService.ChargeTokens(aipermission, ctxUser.Username)
 	json.NewEncoder(w).Encode(memeresponse)
 }

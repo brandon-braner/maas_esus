@@ -57,6 +57,7 @@ func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next 
 		Firstname:   user.Firstname,
 		Lastname:    user.Lastname,
 		Permissions: user.Permissions,
+		Tokens:      user.Tokens,
 	}
 
 	r = r.WithContext(context.WithValue(r.Context(), contextservice.CtxUser, ctxUser))

@@ -13,4 +13,5 @@ type CTXUser struct {
 	Firstname               string `json:"firstname" bson:"firstname"`
 	Lastname                string `json:"lastname" bson:"lastname"`
 	permissions.Permissions `json:"permissions" bson:"permissions"`
+	Tokens                  int `json:"tokens" bson:"tokens"`
 }

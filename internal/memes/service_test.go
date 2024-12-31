@@ -6,6 +6,15 @@ import (
 	"github.com/brandonbraner/maas/config"
 )
 
+type MockMemeGenerator struct {
+	called bool
+}
+
+func (m *MockMemeGenerator) Generate(req MemeRequest) (MemeResponse, error) {
+	m.called = true
+	return MemeResponse{Text: "mocked response"}, nil
+}
+
 func Setup(t *testing.T) *MemeService {
 	config.SetupMongoTestConfig()
 	service, err := NewMemeService()
@@ -14,20 +23,18 @@ func Setup(t *testing.T) *MemeService {
 	}
 
 	return service
-
 }
 
-func TestMemeService_TextGenerator(t *testing.T) {
-
+func TestMemeService_GenerateMeme_Text(t *testing.T) {
 	service := Setup(t)
 
 	req := MemeRequest{
 		Query: "test",
 	}
 
-	resp, err := service.TextGenerator.Generate(req)
+	resp, err := service.GenerateMeme(false, req)
 	if err != nil {
-		t.Errorf("TextGenerator.Generate failed: %v", err)
+		t.Errorf("GenerateMeme failed: %v", err)
 	}
 
 	expectedText := "This is a text meme about test"
@@ -36,23 +43,37 @@ func TestMemeService_TextGenerator(t *testing.T) {
 	}
 }
 
-func TestMemeService_AITextGenerator(t *testing.T) {
-	service, err := NewMemeService()
-	if err != nil {
-		t.Fatalf("Failed to create meme service: %v", err)
-	}
+func TestMemeService_GenerateMeme_AI(t *testing.T) {
+	service := Setup(t)
+	
+	// Replace AI generator with mock
+	mockAI := &MockMemeGenerator{}
+	var generator MemeGenerator = mockAI
+	service.AITextGenerator = &generator
 
 	req := MemeRequest{
 		Query: "test",
 	}
 
-	resp, err := service.AITextGenerator.Generate(req)
+	_, err := service.GenerateMeme(true, req)
 	if err != nil {
-		t.Errorf("AITextGenerator.Generate failed: %v", err)
+		t.Errorf("GenerateMeme failed: %v", err)
 	}
 
-	expectedText := "This is an AI-generated meme about test"
-	if resp.Text != expectedText {
-		t.Errorf("Expected text %q, got %q", expectedText, resp.Text)
+	if !mockAI.called {
+		t.Error("Expected AI generator to be called but it wasn't")
+	}
+}
+
+func TestMemeService_GenerateMeme_Error(t *testing.T) {
+	service := &MemeService{} // Empty service to force error
+
+	req := MemeRequest{
+		Query: "test",
+	}
+
+	_, err := service.GenerateMeme(true, req)
+	if err == nil {
+		t.Error("Expected error from GenerateMeme with invalid service")
 	}
 }
