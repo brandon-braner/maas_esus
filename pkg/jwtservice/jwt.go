@@ -1,16 +1,17 @@
-package jwt
+package jwtservice
 
 import (
 	"errors"
 	"time"
 
+	"github.com/brandonbraner/maas/config"
 	"github.com/brandonbraner/maas/pkg/permissions"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 var (
-	tokenExpiration = time.Hour * 24            //TODO update later with something from config
-	secretKey       = []byte("your-secret-key") //TODO Update with something from config that gets set from the env
+	tokenExpiration = time.Hour * 24 //TODO update later with something from config
+	secretKey       = config.JWT_SECRET_KEY
 	ErrInvalidToken = errors.New("invalid token")
 )
 

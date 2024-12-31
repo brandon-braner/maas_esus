@@ -19,6 +19,7 @@ type UserRepository interface {
 	GetByUserName(ctx context.Context, username string) (*User, error)
 	Update(ctx context.Context, id string, user *User) error
 	Delete(ctx context.Context, id string) error
+	DeleteAll(ctx context.Context) (int64, error)
 }
 
 type userRepository struct {
@@ -69,7 +70,6 @@ func (r *userRepository) GetByID(ctx context.Context, id string) (*User, error) 
 
 func (r *userRepository) GetByUserName(ctx context.Context, username string) (*User, error) {
 	var user User
-	// err := r.collection.FindOne(ctx, map[string]string{"_id": id}).Decode(&user)
 	err := r.collection.FindOne(ctx, bson.M{"username": username}, options.FindOne().SetProjection(bson.M{"password": 0})).Decode(&user)
 
 	if err != nil {
@@ -97,6 +97,26 @@ func (r *userRepository) Delete(ctx context.Context, id string) error {
 	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": objectID})
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
+	}
+	return nil
+}
+
+func (r *userRepository) DeleteAll(ctx context.Context) (int64, error) {
+	result, err := r.collection.DeleteMany(ctx, bson.M{})
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete all users: %w", err)
+	}
+	return result.DeletedCount, nil
+}
+
+func (r *userRepository) UpdatePermission(ctx context.Context, username string, permission string, val bool) error {
+	filter := bson.M{"username": username}
+	update := bson.M{"$set": bson.M{"permissions." + permission: val}}
+
+	_, err := r.collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		log.Printf("error updating permission for user %s: %v", username, err)
+		return fmt.Errorf("error updating permission for user %s: %v", username, err)
 	}
 	return nil
 }
