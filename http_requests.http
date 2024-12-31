@@ -49,3 +49,7 @@ Authorization: Bearer {{tokenWithoutLLM}}
 ### POST request / Valid Token without llm permissions
 POST {{baseUrl}}/
 Authorization: Bearer {{tokenWithoutLLM}}
+
+### GET Request to get token balance
+GET {{baseUrl}}/v1/tokens
+Authorization: Bearer {{tokenWithoutLLM}}
