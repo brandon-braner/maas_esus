@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	v1 "github.com/brandonbraner/maas/internal/api/v1"
 	"github.com/brandonbraner/maas/pkg/http/middleware"
 	"github.com/urfave/negroni"
 )
@@ -18,6 +19,8 @@ func main() {
 	})
 
 	n.UseHandler(mux)
+
+	v1.RegisterRoutes(mux)
 
 	server := &http.Server{
 		Addr:    ":8080",

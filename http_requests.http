@@ -1,22 +1,51 @@
 @baseUrl = http://localhost:8080
-@tokenWithLLM = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc3MzY2NjgzNzkyYzU5YmFmZWQzYjM1IiwiZW1haWwiOiJsbG1AZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6eyJHZW5lcmF0ZUxsbU1lbWUiOnRydWV9LCJleHAiOjE3MzU3MDU1MTYsImlhdCI6MTczNTYxOTExNn0.u7LQdPntgz_k6zbGQhKrrPcn1FK7e99OWp5cyMPMaKs
-@tokenWithoutLLM = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc3MWVhZjM1YTEwNmVjMGU5MTRhMmQxIiwiZW1haWwiOiJub25sbG1AZXhhbXBsZS5jb20iLCJleHAiOjE3MzU2MTk0NjgsImlhdCI6MTczNTUzMzA2OH0.Cg4to8ClPVbSHyEVjMtxQAPLoQzxbPaf_KYl-4lrGb8
+@tokenWithLLM = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc3MzY2NjgzNzkyYzU5YmFmZWQzYjM1IiwiZW1haWwiOiJsbG1AZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6eyJHZW5lcmF0ZUxsbU1lbWUiOnRydWV9LCJleHAiOjE3MzU3MTU1NTQsImlhdCI6MTczNTYyOTE1NH0.msCeJvj8QSrQBLZcd8KYyOVE_U95VsiY8vP6WSmX0Uc
+@tokenWithoutLLM = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc3MzY2Njc2YTYyYjhiMjg4ZjljOWFmIiwiZW1haWwiOiJub25sbG1AZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6eyJHZW5lcmF0ZUxsbU1lbWUiOmZhbHNlfSwiZXhwIjoxNzM1NzE1NTU1LCJpYXQiOjE3MzU2MjkxNTV9.aZvolW4-cEiWqhaEObTLtgdo7mzhMp24tnHw4nWcgNM
 
-### GET request for Long Island City, NY - No Auth Header
-GET {{baseUrl}}/v1/meme?lat=40.730610&lon=-73.935242&query=generate%20an%20image%20with%201000%20shoes
+### POST request for lngg Island City, NY - No Auth Header
+POST {{baseUrl}}/v1/meme
+Content-Type: application/json
 
-### GET request for Long Island City, NY - Invalid Header
-GET {{baseUrl}}/v1/meme?lat=40.730610&lon=-73.935242&query=generate%20an%20image%20with%201000%20shoes
+{
+{
+  "lat": 40.730610,
+  "lng": -73.935242,
+  "query": "generate an image with 1000 shoes"
+}
+
+### POST request for lngg Island City, NY - Invalid Header
+POST {{baseUrl}}/v1/meme
+Content-Type: application/json
 Authorization: Bearer badtoken
 
-### GET request for Long Island City, NY - Valid Token with llm permissions
-GET {{baseUrl}}/v1/meme?lat=40.730610&lon=-73.935242&query=generate%20an%20image%20with%201000%20shoes
+{
+  "lat": 40.730610,
+  "lng": -73.935242,
+  "query": "generate an image with 1000 shoes"
+}
+
+### POST request for lngg Island City, NY - Valid Token with llm permissions
+POST {{baseUrl}}/v1/meme
+Content-Type: application/json
 Authorization: Bearer {{tokenWithLLM}}
 
-### GET request for Istanbul, Turkey - Valid Token without llm permissions
-GET {{baseUrl}}/v1/meme?lat=41.008240&lon=28.978359&query=generate%20an%20image%20with%20turkish%20coffee
+{
+  "lat": 40.730610,
+  "lng": -73.935242,
+  "query": "generate an image with 1000 shoes"
+}
+
+### POST request for Istanbul, Turkey - Valid Token without llm permissions
+POST {{baseUrl}}/v1/meme
+Content-Type: application/json
 Authorization: Bearer {{tokenWithoutLLM}}
 
-### GET request / Valid Token without llm permissions
-GET {{baseUrl}}/
+{
+  "lat": 41.008240,
+  "lng": 28.978359,
+  "query": "generate an image with turkish coffee"
+}
+
+### POST request / Valid Token without llm permissions
+POST {{baseUrl}}/
 Authorization: Bearer {{tokenWithoutLLM}}
