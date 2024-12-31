@@ -11,9 +11,12 @@ type Config struct {
 	GOOGLE_GEOCODE_API_KEY  string
 	OPENAI_API_KEY          string
 	MONGODB_URI             string
-	MONGO_DB                string
+	MONGO_DB_NAME           string
 	TEXT_MEME_TOKEN_COST    int
 	AI_TEXT_MEME_TOKEN_COST int
+
+	//Mongo Collection Names
+	USER_COLLECTION_NAME string
 }
 
 var AppConfig Config
@@ -27,7 +30,7 @@ func init() {
 	AppConfig.GOOGLE_GEOCODE_API_KEY = os.Getenv("GOOGLE_GEOCODE_API_KEY")
 	AppConfig.OPENAI_API_KEY = os.Getenv("OPENAI_API_KEY")
 	AppConfig.MONGODB_URI = generateMongoUri()
-	AppConfig.MONGO_DB = os.Getenv("MONGO_DB_NAME")
+	AppConfig.MONGO_DB_NAME = os.Getenv("MONGO_DB_NAME")
 
 	//TODO ignoring errors for now as I am not sure what type of error to throw here
 	textMemeTokenCost, _ := strconv.Atoi(os.Getenv("TEXT_MEME_TOKEN_COST"))
@@ -35,6 +38,9 @@ func init() {
 
 	AppConfig.TEXT_MEME_TOKEN_COST = textMemeTokenCost
 	AppConfig.AI_TEXT_MEME_TOKEN_COST = aiTextMemeTokenCost
+
+	//Mongo Collection Names
+	AppConfig.USER_COLLECTION_NAME = "users"
 
 }
 
@@ -55,6 +61,6 @@ func generateMongoUri() string {
 
 func SetupMongoTestConfig() {
 	// set the appconfig db name to the test db
-	AppConfig.MONGO_DB = "testmaas"
+	AppConfig.MONGO_DB_NAME = "testmaas"
 	AppConfig.MONGODB_URI = "mongodb://root:password@localhost:27017"
 }
