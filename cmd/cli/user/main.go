@@ -127,7 +127,7 @@ func main() {
 			username, _ := cmd.Flags().GetString("username")
 			amount, _ := cmd.Flags().GetInt("amount")
 
-			err := userService.AddTokens(username, amount)
+			err := userService.UpdateTokens(username, amount)
 			if err != nil {
 				fmt.Printf("Failed to add tokens: %v\n", err)
 				return

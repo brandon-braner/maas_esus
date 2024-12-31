@@ -12,18 +12,23 @@ import (
 
 var memeService *MemeService
 
-func init() {
-	var err error
-	memeService, err = NewMemeService()
+// func init() {
+// 	var err error
+// 	memeService, err = NewMemeService()
+// 	if err != nil {
+// 		panic(fmt.Sprintf("failed to initialize meme service: %v", err))
+// 	}
+// }
+
+func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
+	// var err error
+	memeService, err := NewMemeService()
 	if err != nil {
 		panic(fmt.Sprintf("failed to initialize meme service: %v", err))
 	}
-}
-
-func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 	var memeRequest MemeRequest
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&memeRequest)
+	err = decoder.Decode(&memeRequest)
 
 	if err != nil {
 		errmsg := errors.CustomError{
@@ -45,6 +50,9 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	aipermission := ctxUser.Permissions.GenerateLlmMeme
+
+	//TODO we should make sure they have enough tokens to gen the meme
+
 	memeresponse, err := memeService.GenerateMeme(aipermission, memeRequest)
 	if err != nil {
 		errmsg := errors.CustomError{
@@ -53,5 +61,8 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
 		return
 	}
+
+	//Assume we have made it here, we got a meme, lets charge them some tokens
+	memeService.ChargeTokens(aipermission, ctxUser.Username)
 	json.NewEncoder(w).Encode(memeresponse)
 }

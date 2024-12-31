@@ -94,11 +94,12 @@ func (us *UserService) DeleteAllUsers() (int64, error) {
 	return count, err
 }
 
-func (us *UserService) AddTokens(username string, amount int) error {
+func (us *UserService) UpdateTokens(username string, amount int) error {
 	if username == "" {
 		return errors.New("username cannot be empty")
 	}
 
+	//TODO do we need to put a mutex here
 	user, err := us.Repo.GetByUserName(context.TODO(), username)
 	if err != nil {
 		return err
