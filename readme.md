@@ -1,3 +1,6 @@
+# Anwsers to questions 3 & 4
+
+Answers to questions 3 & 4 can be found [here](./interview_questions.md)
 # Running Locally to Test
 
 ## Run Docker
@@ -17,6 +20,12 @@ Copy the jwt for the user you want to test and open http_requests.http in the ro
 Replace the appropriate jwt variable. If you copied the `llm@example.com` replace `@tokenWithLLM` and for `nonllm@example.com` replace `tokenWithoutLLM`.
 
 If you are in Vscode you will need the [Rest Client Extension](https://marketplace.visualstudio.com/items?itemName=humao.rest-client). JetBrains Goland works outta the box.
+
+## Running Load Tests
+There is a simple load test using k6 to make sure we are hitting the 100 requests per second. You can run it by running `make run_load_test_non_llm`. 
+
+This will add 5000 tokens to the nonllm user so they have enough to get through the load test and then run up to 200 vus for 15 seconds.
+
 
 # **REST API Overview**
 - **API Framework**: Go net/http

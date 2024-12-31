@@ -14,4 +14,7 @@ run_api:
 
 
 run_load_test_non_llm:
+
+	go run cmd/cli/user/main.go add-tokens --username nonllm@example.com --amount 5000
+
 	k6 run scripts/load_test_meme.js
