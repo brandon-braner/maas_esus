@@ -12,6 +12,7 @@ type MemeService struct {
 	Repo            *memeRepository
 	TextGenerator   *MemeGenerator // Strategy for text memes
 	AITextGenerator *MemeGenerator // Strategy for AI memes
+	UserService     *usersapi.UserService
 }
 
 func NewMemeService() (*MemeService, error) {
@@ -30,10 +31,16 @@ func NewMemeService() (*MemeService, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	userservice, err := usersapi.NewUserService()
+	if err != nil {
+		return nil, err
+	}
 	service := &MemeService{
 		Repo:            repo,
 		TextGenerator:   textgen,
 		AITextGenerator: aitextgen,
+		UserService:     userservice,
 	}
 
 	return service, nil
@@ -51,10 +58,6 @@ func (s *MemeService) GenerateMeme(aiPermission bool, memeRequest MemeRequest) (
 }
 
 func (s *MemeService) ChargeTokens(aiGenerated bool, username string) error {
-	tokenservice, err := usersapi.NewUserService()
-	if err != nil {
-		return err
-	}
 
 	var numOfTokens int
 	if aiGenerated {
@@ -65,7 +68,7 @@ func (s *MemeService) ChargeTokens(aiGenerated bool, username string) error {
 	//turn tokens negative
 	numOfTokens = numOfTokens * -1
 
-	err = tokenservice.UpdateTokens(username, numOfTokens)
+	err := s.UserService.UpdateTokens(username, numOfTokens)
 	if err != nil {
 		fmt.Sprintf("Could not charge user %s token amount %d. Still returning meme", username, numOfTokens)
 	}
@@ -92,13 +95,8 @@ func (s *MemeService) VerifyTokens(aiGenerated bool, currenttokens int) bool {
 }
 
 func (s *MemeService) GetTokenCount(username string) (int, error) {
-	tokenservice, err := usersapi.NewUserService()
 
-	if err != nil {
-		return 0, err
-	}
-
-	tokencount, err := tokenservice.GetTokenCount(username)
+	tokencount, err := s.UserService.GetTokenCount(username)
 
 	if err != nil {
 		return 0, err
