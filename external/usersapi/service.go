@@ -113,3 +113,20 @@ func (us *UserService) UpdateTokens(username string, amount int) error {
 	err = us.Repo.Update(context.TODO(), user.ID.Hex(), user)
 	return err
 }
+
+func (us *UserService) GetTokenCount(username string) (int, error) {
+	if username == "" {
+		return 0, errors.New("username cannot be empty")
+	}
+
+	us.mu.Lock()
+
+	user, err := us.Repo.GetByUserName(context.TODO(), username)
+	us.mu.Unlock()
+	if err != nil {
+		return 0, err
+	}
+
+	return user.Tokens, nil
+
+}

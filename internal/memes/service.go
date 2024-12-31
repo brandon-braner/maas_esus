@@ -90,3 +90,19 @@ func (s *MemeService) VerifyTokens(aiGenerated bool, currenttokens int) bool {
 	return true
 
 }
+
+func (s *MemeService) GetTokenCount(username string) (int, error) {
+	tokenservice, err := usersapi.NewUserService()
+
+	if err != nil {
+		return 0, err
+	}
+
+	tokencount, err := tokenservice.GetTokenCount(username)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return tokencount, nil
+}

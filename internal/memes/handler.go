@@ -70,3 +70,30 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 	memeService.ChargeTokens(aipermission, ctxUser.Username)
 	json.NewEncoder(w).Encode(memeresponse)
 }
+
+func MemeTokenHandler(w http.ResponseWriter, r *http.Request) {
+	userctx := r.Context().Value(contextservice.CtxUser)
+	ctxUser, ok := userctx.(contextservice.CTXUser)
+
+	if !ok {
+		errmsg := errors.CustomError{
+			ErrorMessage: "Internal Server Error loading MemeCtx",
+		}
+		responses.JsonResponse(w, http.StatusInternalServerError, errmsg)
+		return
+	}
+
+	tokencount, err := memeService.GetTokenCount(ctxUser.Username)
+
+	if err != nil {
+		if err != nil {
+			errmsg := errors.CustomError{
+				ErrorMessage: err.Error(),
+			}
+			responses.JsonResponse(w, http.StatusBadRequest, errmsg)
+			return
+		}
+	}
+
+	responses.JsonResponse(w, http.StatusOK, tokencount)
+}
