@@ -1,4 +1,4 @@
-package http
+package responses
 
 import (
 	"encoding/json"
@@ -17,6 +17,11 @@ type ErrorResponse struct {
 func JsonResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
+
+	if str, ok := data.(string); ok {
+		data = Response{Message: str}
+	}
+
 	json.NewEncoder(w).Encode(data)
 }
 

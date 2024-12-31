@@ -1,9 +1,24 @@
-Here’s a revised and more structured version of your REST API description. I’ve clarified the flow, improved readability, and organized the details to make it easier for someone to understand:
+# Running Locally to Test
 
----
+## Run Docker
+The app uses Mongodb and Redis in Docker. First we need to get our db's up and running so we will need to run `docker compose up`
 
-### **REST API Overview**
-I am building a REST API using the following technologies:
+## Create Tesst Users
+Create test users. From the root run `make create_users`. Everytime you run this we delete and regenerate the users.
+
+This will create two users in the Mongo database:
+- nonllm@example.com a user that will create normal memes without ai. They have 50 tokens to start with as non gen ai memes are cheapers
+- llm@example.com a user that wil create gen ai memes as they have the generate_llm_meme permission. They have 100 tokens to start with.
+- Generate users jwt. Run this command to generate a jwt for each user `make generate_jwt`
+
+### Make API Requests
+Copy the jwt for the user you want to test and open http_requests.http in the root of the project.
+
+Replace the appropriate jwt variable. If you copied the `llm@example.com` replace `@tokenWithLLM` and for `nonllm@example.com` replace `tokenWithoutLLM`.
+
+If you are in Vscode you will need the [Rest Client Extension](https://marketplace.visualstudio.com/items?itemName=humao.rest-client). JetBrains Goland works outta the box.
+
+# **REST API Overview**
 - **API Framework**: Go net/http
 - **In-Memory Store**: Redis (Memorystore)
 - **Database**: MongoDB
