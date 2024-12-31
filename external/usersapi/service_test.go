@@ -9,6 +9,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Setup(t *testing.T, service *UserService) *User {
+	username := "testuser@example.com"
+
+	usermodel, err := service.NewUser(username, "password", "Bob", "Smith", 100, permissions.Permissions{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	user, err := service.CreateUser(usermodel)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	return user
+}
+
+func TearDown(service *UserService, userid string) {
+	service.DeleteUser(userid)
+}
+
 func TestUserService_GenerateJwt(t *testing.T) {
 	// Setup
 	config.SetupMongoTestConfig()
@@ -16,41 +36,26 @@ func TestUserService_GenerateJwt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-
+	user := Setup(t, service)
 	t.Run("successful token generation", func(t *testing.T) {
-		username := "testuser@example.com"
-
-		usermodel, err := service.NewUser(username, "password", "Bob", "Smith", 100, permissions.Permissions{})
-		if err != nil {
-			t.Fatal(err.Error())
-		}
-
-		user, err := service.CreateUser(usermodel)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
 
 		token, err := service.GenerateJwt(user.Username)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, token)
-
+		useridString := user.ID.Hex()
 		// Verify token claims
 		claims, err := jwt.ValidateToken(token)
 		assert.NoError(t, err)
-		assert.Equal(t, user.ID.Hex(), claims.UserID)
-		assert.Equal(t, username, claims.Email)
+		assert.Equal(t, useridString, claims.UserID)
+		assert.Equal(t, user.Username, claims.Email)
 
+		TearDown(service, useridString)
 	})
 
-	// t.Run("empty user ID", func(t *testing.T) {
-	// 	_, err := service.GenerateJwt("", "testuser", permissions.Permissions{})
-	// 	assert.Error(t, err)
-	// })
-
-	// t.Run("empty username", func(t *testing.T) {
-	// 	_, err := service.GenerateJwt("123", "", permissions.Permissions{})
-	// 	assert.Error(t, err)
-	// })
+	t.Run("empty username", func(t *testing.T) {
+		_, err := service.GenerateJwt("")
+		assert.Error(t, err)
+	})
 
 }

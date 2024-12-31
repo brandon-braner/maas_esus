@@ -3,10 +3,12 @@ package usersapi
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/brandonbraner/maas/config"
 	"github.com/brandonbraner/maas/pkg/database"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -79,7 +81,11 @@ func (r *userRepository) Update(ctx context.Context, id string, user *User) erro
 }
 
 func (r *userRepository) Delete(ctx context.Context, id string) error {
-	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": id})
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal("Failed to convert hex string to ObjectID:", err)
+	}
+	_, err = r.collection.DeleteOne(ctx, bson.M{"_id": objectID})
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
