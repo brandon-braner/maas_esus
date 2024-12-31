@@ -14,9 +14,13 @@ type Config struct {
 	MONGO_DB_NAME           string
 	TEXT_MEME_TOKEN_COST    int
 	AI_TEXT_MEME_TOKEN_COST int
+	REDIS_URL               string
+	REDIS_CACHE_TTL         int
 
 	//Mongo Collection Names
 	USER_COLLECTION_NAME string
+
+	GET_REAL_GEOLOCATION bool
 }
 
 var AppConfig Config
@@ -31,6 +35,16 @@ func init() {
 	AppConfig.OPENAI_API_KEY = os.Getenv("OPENAI_API_KEY")
 	AppConfig.MONGODB_URI = generateMongoUri()
 	AppConfig.MONGO_DB_NAME = os.Getenv("MONGO_DB_NAME")
+	AppConfig.REDIS_URL = os.Getenv("REDIS_URL")
+
+	AppConfig.GET_REAL_GEOLOCATION = true
+
+	// Default cache TTL to 1 hour if not set
+	redisTTL, _ := strconv.Atoi(os.Getenv("REDIS_CACHE_TTL"))
+	if redisTTL == 0 {
+		redisTTL = 3600
+	}
+	AppConfig.REDIS_CACHE_TTL = redisTTL
 
 	//TODO ignoring errors for now as I am not sure what type of error to throw here
 	textMemeTokenCost, _ := strconv.Atoi(os.Getenv("TEXT_MEME_TOKEN_COST"))
