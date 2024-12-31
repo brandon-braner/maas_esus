@@ -86,13 +86,11 @@ func MemeTokenHandler(w http.ResponseWriter, r *http.Request) {
 	tokencount, err := memeService.GetTokenCount(ctxUser.Username)
 
 	if err != nil {
-		if err != nil {
-			errmsg := errors.CustomError{
-				ErrorMessage: err.Error(),
-			}
-			responses.JsonResponse(w, http.StatusBadRequest, errmsg)
-			return
+		errmsg := errors.CustomError{
+			ErrorMessage: err.Error(),
 		}
+		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
+		return
 	}
 
 	responses.JsonResponse(w, http.StatusOK, tokencount)
