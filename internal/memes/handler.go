@@ -12,23 +12,20 @@ import (
 
 var memeService *MemeService
 
-// func init() {
-// 	var err error
-// 	memeService, err = NewMemeService()
-// 	if err != nil {
-// 		panic(fmt.Sprintf("failed to initialize meme service: %v", err))
-// 	}
-// }
-
-func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
-	// var err error
-	memeService, err := NewMemeService()
+func init() {
+	var err error
+	memeService, err = NewMemeService()
 	if err != nil {
 		panic(fmt.Sprintf("failed to initialize meme service: %v", err))
 	}
+}
+
+func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
+	// var err error
+
 	var memeRequest MemeRequest
 	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&memeRequest)
+	err := decoder.Decode(&memeRequest)
 
 	if err != nil {
 		errmsg := errors.CustomError{
@@ -56,7 +53,7 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		errmsg := errors.CustomError{
 			ErrorMessage: fmt.Sprintf("Not enough tokens to complete request. Current token count of %d.", ctxUser.Tokens),
 		}
-		responses.JsonResponse(w, http.StatusInternalServerError, errmsg)
+		responses.JsonResponse(w, http.StatusPaymentRequired, errmsg)
 		return
 	}
 

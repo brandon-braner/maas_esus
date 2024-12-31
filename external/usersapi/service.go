@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/brandonbraner/maas/pkg/jwtservice"
 	"github.com/brandonbraner/maas/pkg/permissions"
@@ -14,6 +15,7 @@ import (
 
 type UserService struct {
 	Repo *userRepository
+	mu   sync.Mutex
 }
 
 func NewUserService() (*UserService, error) {
@@ -99,7 +101,9 @@ func (us *UserService) UpdateTokens(username string, amount int) error {
 		return errors.New("username cannot be empty")
 	}
 
-	//TODO do we need to put a mutex here
+	us.mu.Lock()
+	defer us.mu.Unlock()
+
 	user, err := us.Repo.GetByUserName(context.TODO(), username)
 	if err != nil {
 		return err
