@@ -110,6 +110,12 @@ func (us *UserService) UpdateTokens(username string, amount int) error {
 	}
 
 	user.Tokens += amount
+
+	// Prevent tokens from going below zero
+	if user.Tokens < 0 {
+		return fmt.Errorf("insufficient tokens: cannot reduce tokens below zero (current: %d, attempted change: %d)", user.Tokens, amount)
+	}
+
 	err = us.Repo.Update(context.TODO(), user.ID.Hex(), user)
 	return err
 }
@@ -119,6 +125,8 @@ func (us *UserService) GetTokenCount(username string) (int, error) {
 		return 0, errors.New("username cannot be empty")
 	}
 
+	us.mu.Lock()
+	defer us.mu.Unlock()
 	user, err := us.Repo.GetByUserName(context.TODO(), username)
 	if err != nil {
 		return 0, err

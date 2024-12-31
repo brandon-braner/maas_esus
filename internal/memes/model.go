@@ -1,13 +1,17 @@
 package memes
 
-import "github.com/go-playground/validator/v10"
+import (
+	"context"
+	"github.com/go-playground/validator/v10"
+)
 
 var validate = validator.New()
 
 type MemeRequest struct {
-	Lat   float64 `json:"lat" validate:"latitude"` // Latitude
-	Lng   float64 `json:"lng" validate:"longitude` // Longitude
-	Query string  `json:"query"`                   // Search query
+	Lat     float64   `json:"lat" validate:"latitude"` // Latitude
+	Lng     float64   `json:"lng" validate:"longitude` // Longitude
+	Query   string    `json:"query"`                   // Search query
+	Context context.Context `json:"-"`                 // Context for tracing
 }
 
 // MemeResponse represents the response for a generated meme

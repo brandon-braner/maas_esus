@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 @tokenWithLLM = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc3MzY2NjgzNzkyYzU5YmFmZWQzYjM1IiwiZW1haWwiOiJsbG1AZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6eyJHZW5lcmF0ZUxsbU1lbWUiOnRydWV9LCJleHAiOjE3MzU3MTU1NTQsImlhdCI6MTczNTYyOTE1NH0.msCeJvj8QSrQBLZcd8KYyOVE_U95VsiY8vP6WSmX0Uc
-@tokenWithoutLLM = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc3MzY2Njc2YTYyYjhiMjg4ZjljOWFmIiwiZW1haWwiOiJub25sbG1AZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6eyJHZW5lcmF0ZUxsbU1lbWUiOmZhbHNlfSwiZXhwIjoxNzM1NzE1NTU1LCJpYXQiOjE3MzU2MjkxNTV9.aZvolW4-cEiWqhaEObTLtgdo7mzhMp24tnHw4nWcgNM
+@tokenWithoutLLM = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc3MzY2Njc2YTYyYjhiMjg4ZjljOWFmIiwiZW1haWwiOiJub25sbG1AZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6eyJHZW5lcmF0ZUxsbU1lbWUiOmZhbHNlfSwiZXhwIjoxNzM1NzU2Mzg1LCJpYXQiOjE3MzU2Njk5ODV9.WSdejD760Ad6MzMg2rgzLhYdUyqhVc3z8L1zKk1fmaE
 
 ### POST request for lngg Island City, NY - No Auth Header
 POST {{baseUrl}}/v1/meme
@@ -46,8 +46,8 @@ Authorization: Bearer {{tokenWithoutLLM}}
   "query": "generate an image with turkish coffee"
 }
 
-### POST request / Valid Token without llm permissions
-POST {{baseUrl}}/
+### GET request /health Valid Token without llm permissions
+GET {{baseUrl}}/health
 Authorization: Bearer {{tokenWithoutLLM}}
 
 ### GET Request to get token balance
