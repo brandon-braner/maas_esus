@@ -2,6 +2,7 @@ package memes
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/brandonbraner/maas/config"
 	"github.com/brandonbraner/maas/external/usersapi"
@@ -64,7 +65,10 @@ func (s *MemeService) ChargeTokens(aiGenerated bool, username string) error {
 	//turn tokens negative
 	numOfTokens = numOfTokens * -1
 
-	tokenservice.UpdateTokens(username, numOfTokens)
+	err = tokenservice.UpdateTokens(username, numOfTokens)
+	if err != nil {
+		fmt.Sprintf("Could not charge user %s token amount %d. Still returning meme", username, numOfTokens)
+	}
 	return nil
 }
 
