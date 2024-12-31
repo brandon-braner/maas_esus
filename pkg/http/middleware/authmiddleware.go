@@ -14,6 +14,15 @@ import (
 
 type AuthMiddleware struct{}
 
+var userService *usersapi.UserService
+
+func init() {
+	var err error
+	userService, err = usersapi.NewUserService()
+	if err != nil {
+		return
+	}
+}
 func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
@@ -34,12 +43,6 @@ func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next 
 		}
 
 		responses.JsonResponse(w, http.StatusUnauthorized, err)
-		return
-	}
-
-	userService, err := usersapi.NewUserService()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

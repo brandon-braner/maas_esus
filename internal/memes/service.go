@@ -6,6 +6,7 @@ import (
 
 	"github.com/brandonbraner/maas/config"
 	"github.com/brandonbraner/maas/external/usersapi"
+	"github.com/brandonbraner/maas/pkg/contextservice"
 )
 
 type MemeService struct {
@@ -79,8 +80,9 @@ func (s *MemeService) ChargeTokens(aiGenerated bool, username string) error {
 	log.Info(fmt.Sprintf("%d tokens charged to %s", numOfTokens, username))
 	return nil
 }
-func (s *MemeService) VerifyTokens(aiGenerated bool, currenttokens int) bool {
-	if currenttokens < 0 {
+func (s *MemeService) VerifyTokens(aiGenerated bool, user contextservice.CTXUser) bool {
+
+	if user.Tokens < 0 {
 		return false
 	}
 
@@ -91,7 +93,7 @@ func (s *MemeService) VerifyTokens(aiGenerated bool, currenttokens int) bool {
 		tokensRequired = config.AppConfig.TEXT_MEME_TOKEN_COST
 	}
 
-	if currenttokens < tokensRequired {
+	if user.Tokens < tokensRequired {
 		return false
 	}
 	return true
