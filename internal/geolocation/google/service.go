@@ -1,8 +1,6 @@
 package google
 
 import (
-	"context"
-
 	"github.com/brandonbraner/maas/internal/geolocation"
 	"googlemaps.github.io/maps"
 )
@@ -16,25 +14,25 @@ func NewGeoLocationService(apiKey string) (*GeoLocationService, error) {
 }
 
 func (g *GeoLocationService) GetLocationInfo(lat, lng float64) (*geolocation.LocationInfo, error) {
-	r := &maps.GeocodingRequest{
-		LatLng: &maps.LatLng{
-			Lat: lat,
-			Lng: lng,
-		},
-	}
+	// r := &maps.GeocodingRequest{
+	// 	LatLng: &maps.LatLng{
+	// 		Lat: lat,
+	// 		Lng: lng,
+	// 	},
+	// }
 
-	results, err := g.client.ReverseGeocode(context.Background(), r)
-	if err != nil {
-		return nil, err
-	}
+	// results, err := g.client.ReverseGeocode(context.Background(), r)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	if len(results) == 0 {
-		return &geolocation.LocationInfo{}, nil
-	}
+	// if len(results) == 0 {
+	// 	return &geolocation.LocationInfo{}, nil
+	// }
 
 	// we are just returning the full address and going to let the llm handle the rest
 	info := &geolocation.LocationInfo{}
-	info.Address = results[0].FormattedAddress
+	info.Address = "Your address based on your %d lat, %d lng" //google is slowing down the ability to hit 100 rs
 
 	return info, nil
 }

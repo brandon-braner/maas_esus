@@ -20,6 +20,16 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
     restart: unless-stopped
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: maas_jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # Jaeger collector HTTP
+      - "6831:6831/udp"  # Jaeger agent UDP
+      - "4317:4317"  # OTLP gRPC
+    restart: unless-stopped
+
 volumes:
   redis_data:
   mongo_data:

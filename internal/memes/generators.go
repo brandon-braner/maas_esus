@@ -1,18 +1,21 @@
 package memes
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/brandonbraner/maas/config"
 	"github.com/brandonbraner/maas/internal/ai"
 	"github.com/brandonbraner/maas/internal/geolocation/google"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 type MemeGenerator interface {
 	Generate(req MemeRequest) (MemeResponse, error)
 }
 
-func NewMemeGenerator(aiPermission bool) (*MemeGenerator, error) {
+func NewMemeGenerator(aiPermission bool) (MemeGenerator, error) {
 
 	geoservice, err := google.NewGeoLocationService(config.AppConfig.GOOGLE_GEOCODE_API_KEY)
 
@@ -37,7 +40,7 @@ func NewMemeGenerator(aiPermission bool) (*MemeGenerator, error) {
 		return nil, fmt.Errorf("invalid permission state")
 	}
 
-	return &generator, nil
+	return generator, nil
 }
 
 type TextMemeGenerator struct {
@@ -45,12 +48,29 @@ type TextMemeGenerator struct {
 }
 
 func (g *TextMemeGenerator) Generate(req MemeRequest) (MemeResponse, error) {
+	ctx := req.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	tracer := otel.Tracer("memes")
+
+	_, span := tracer.Start(ctx, "text-meme-generator")
+	span.SetAttributes(
+		attribute.String("meme.query", req.Query),
+		attribute.Float64("location.lat", req.Lat),
+		attribute.Float64("location.lng", req.Lng),
+	)
+	defer span.End()
+
+	_, locationSpan := tracer.Start(ctx, "get-location-info")
 
 	locationinfo, err := g.GeoService.GetLocationInfo(req.Lat, req.Lng)
 
 	if err != nil {
+		span.RecordError(err)
 		return MemeResponse{}, err
 	}
+	locationSpan.End()
 
 	return MemeResponse{
 		Text:     fmt.Sprintf("This is a text meme about %s based at the location %s", req.Query, locationinfo.Address),

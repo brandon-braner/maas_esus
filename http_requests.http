@@ -46,8 +46,8 @@ Authorization: Bearer {{tokenWithoutLLM}}
   "query": "generate an image with turkish coffee"
 }
 
-### POST request / Valid Token without llm permissions
-POST {{baseUrl}}/
+### GET request /health Valid Token without llm permissions
+GET {{baseUrl}}/health
 Authorization: Bearer {{tokenWithoutLLM}}
 
 ### GET Request to get token balance

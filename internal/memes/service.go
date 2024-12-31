@@ -11,8 +11,8 @@ import (
 
 type MemeService struct {
 	Repo            *memeRepository
-	TextGenerator   *MemeGenerator // Strategy for text memes
-	AITextGenerator *MemeGenerator // Strategy for AI memes
+	TextGenerator   MemeGenerator // Strategy for text memes
+	AITextGenerator MemeGenerator // Strategy for AI memes
 	UserService     *usersapi.UserService
 }
 
@@ -54,10 +54,10 @@ func NewMemeService() (*MemeService, error) {
 func (s *MemeService) GenerateMeme(aiPermission bool, memeRequest MemeRequest) (MemeResponse, error) {
 	switch aiPermission {
 	case true:
-		return (*s.AITextGenerator).Generate(memeRequest)
+		return s.AITextGenerator.Generate(memeRequest)
 
 	default:
-		return (*s.TextGenerator).Generate(memeRequest)
+		return s.TextGenerator.Generate(memeRequest)
 	}
 
 }

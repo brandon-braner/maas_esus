@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"go.opentelemetry.io/otel"
+
 	"github.com/brandonbraner/maas/pkg/contextservice"
 	"github.com/brandonbraner/maas/pkg/errors"
 	"github.com/brandonbraner/maas/pkg/http/responses"
@@ -26,11 +28,21 @@ func init() {
 }
 
 func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
-	// var err error
+	ctx := r.Context()
+	tracer := otel.Tracer("memes")
 
+	// Start span for request processing
+	ctx, span := tracer.Start(ctx, "meme-generator-handler")
+	defer span.End()
+
+	// Span for request decoding
+	_, decodeSpan := tracer.Start(ctx, "decode-request")
 	var memeRequest MemeRequest
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&memeRequest)
+
+	// add request context for opentelemetry to trace the whole call
+	memeRequest.Context = ctx
 
 	if err != nil {
 		errmsg := errors.CustomError{
@@ -40,7 +52,10 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
 		return
 	}
+	decodeSpan.End()
 
+	// Span for user context extraction
+	_, userCtxSpan := tracer.Start(ctx, "extract-user-context")
 	userctx := r.Context().Value(contextservice.CtxUser)
 	ctxUser, ok := userctx.(contextservice.CTXUser)
 
@@ -53,10 +68,14 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		responses.JsonResponse(w, http.StatusInternalServerError, errmsg)
 		return
 	}
+	userCtxSpan.End()
 
 	aipermission := ctxUser.Permissions.GenerateLlmMeme
 
+	// Span for token verification
+	_, verifySpan := tracer.Start(ctx, "verify-tokens")
 	ok = memeService.VerifyTokens(aipermission, ctxUser)
+
 	if !ok {
 		msg := fmt.Sprintf("Not enough tokens to complete request. Current token count of %d.", ctxUser.Tokens)
 		errmsg := errors.CustomError{
@@ -66,8 +85,12 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		responses.JsonResponse(w, http.StatusPaymentRequired, errmsg)
 		return
 	}
+	verifySpan.End()
 
+	// Span for meme generation
+	_, generateSpan := tracer.Start(ctx, "generate-meme")
 	memeresponse, err := memeService.GenerateMeme(aipermission, memeRequest)
+
 	if err != nil {
 		errmsg := errors.CustomError{
 			ErrorMessage: err.Error(),
@@ -76,9 +99,13 @@ func MemeGeneraterHandler(w http.ResponseWriter, r *http.Request) {
 		responses.JsonResponse(w, http.StatusBadRequest, errmsg)
 		return
 	}
+	generateSpan.End()
 
-	//Assume we have made it here, we got a meme, lets charge them some tokens
+	// Span for token charging
+	_, chargeSpan := tracer.Start(ctx, "charge-tokens")
 	memeService.ChargeTokens(aipermission, ctxUser.Username)
+	chargeSpan.End()
+
 	json.NewEncoder(w).Encode(memeresponse)
 }
 
